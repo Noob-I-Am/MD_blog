@@ -1,0 +1,23 @@
+{% extends '__base__.html' %}
+{% block head %}
+    <meta http-equiv="refresh" content="3;url={{ jump }}" />
+{% endblock %}
+
+{% block maincontent%}
+{#    <section>#}
+    <div class="row container">
+        <div class="card-panel">
+            <p>
+                <span>
+                    {{ message }}
+                </span>
+            </p>
+        </div>
+    </div>
+{#    </section>#}
+{% endblock %}
+{% block endscript %}
+    <script>
+
+    </script>
+{% endblock %}

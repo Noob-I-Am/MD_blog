@@ -1,0 +1,103 @@
+html {
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+}
+
+.side-bar {
+    height: calc(100% + 60px);
+    width: 300px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding-bottom: 60px;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+.main-content {
+    padding-top: 20px;
+}
+
+nav .user-account .circle {
+    margin-right: 10px;
+}
+nav .circle {
+    vertical-align: middle;
+    height: 32px;
+    width: 32px;
+}
+
+nav ul li .nav-emphasis-li {
+    border-bottom: 4px solid #fff;
+    display: inline-block;
+}
+
+.sidenav .collapsible-body li a, .sidenav.fixed .collapsible-body li a {
+    padding: 0 23.5px 0 32px;
+}
+.sidenav li>a {
+    color: rgba(0,0,0,0.87);
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    height: 48px;
+    line-height: 48px;
+    padding: 0 16px;
+}
+
+
+.side-nav .collapsible {
+    margin: 0;
+}
+.side-nav .collapsible, .side-nav.fixed .collapsible {
+    border: none;
+    box-shadow: none;
+}
+
+nav .nav-background {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    opacity: .1;
+}
+
+nav .nav-background img.active, nav .nav-background .pattern.active {
+    opacity: 1;
+}
+
+
+.repeating-background {
+    /* 背景外部div */
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    opacity: .2;
+    /* -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+    transition: opacity .7s; */
+}
+
+
+.repeating-background .pattern {
+    /* 背景内部pattern */
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    /* -webkit-filter: grayscale(100%); */
+
+}
+
+
+
+

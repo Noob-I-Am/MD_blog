@@ -1,0 +1,104 @@
+{% extends '__base__.html' %}
+
+{% block title %}SignUp/注册{% endblock %}
+
+{% block maincontent %}
+    <div class="section container">
+        <div class="row">
+            <div class="col s12 m6 offset-m3">
+                <div class="card ">
+                    <div class="card-content">
+
+                        <form id="modify_user" enctype="multipart/form-data" action="" accept-charset="UTF-8">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            <h4 class="center" style="margin: 0 0 20px 0;">修改账号信息</h4>
+                            <div class="input-field">
+                                <label for="nickname" class="">
+                                    NickName
+                                </label>
+                                <input value="{{ user.nickname }}" type="text" name="nickname" maxlength="10"
+                                       length="10" id="nickname">
+                            </div>
+                            <div class="input-field">
+                                <p>邮箱:<span>{{ user.email }}</span></p>
+                            </div>
+
+                            <div class="input-field">
+                                <label for="password1" class="active">
+                                    新密码
+                                </label>
+                                <input type="password" name="password1" id="password1" class="">
+                            </div>
+                            <div class="input-field">
+                                <label for="password2" class="active">
+                                    再次输入新密码
+                                </label>
+                                <input type="password" name="password2" id="password2" class="">
+                            </div>
+                            <div class="input-field">
+                                <textarea id="profile" class="materialize-textarea" name="profile" maxlength="200"
+                                          length="200">{{ user.profile }}</textarea>
+                                <label for="profile">简介</label>
+                            </div>
+
+                            <p>
+                                <input type="submit" value="Create" class="btn-large z-depth-0">
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block endscript %}
+    <script>
+        $(function () {
+            M.AutoInit();
+
+            $.ajaxSetup({
+                headers: {"X-CSRFToken": getCookie("csrftoken")}
+            });
+            $('#modify_user').submit(function (ev) {
+                ev.preventDefault();
+                let prev_nickname = '{{ user.nickname }}';
+                let nickname = $('#nickname').val();
+                if (!nickname) {
+                    M.toast({html: '<span>昵称不可为空</span>'});
+                    return false``
+                }
+
+
+                if (nickname !== prev_nickname) {
+                    $.ajax({
+                        url: '/user/is_duplicate_nickname/' + nickname,
+                        async: false,
+                        success: function (data) {
+                            if (data === 'True') {
+                                M.toast({html: '<span>重复的昵称,请更换</span>'});
+                                return false
+                            }
+                            if (data === 'False') {
+                                M.toast({html: '<span>昵称可以使用</span>'});
+                            }
+                        }
+                    })
+                }
+                $.ajax({
+                    data: $('#modify_user').serialize(),
+                    type: 'POST',
+                    url: '/user/modify_user_info/',
+                    success: function (data) {
+                        M.toast({html: '修改成功'})
+                        window.location.replace('/index/')
+                    },
+                    error: function (data) {
+                        alert(data)
+                    }
+                })
+
+            })
+        })
+    </script>
+{% endblock %}

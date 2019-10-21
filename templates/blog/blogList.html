@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% block title %}article{% endblock %}
+{% block beforehead %}
+    <style>
+        .nav-background > div {
+            height: 100%;
+            background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMDAiPgo8cGF0aCBkPSJNMjggNjZMMCA1MEwwIDE2TDI4IDBMNTYgMTZMNTYgNTBMMjggNjZMMjggMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMyI+PC9wYXRoPgo8cGF0aCBkPSJNMjggMEwyOCAzNEwwIDUwTDAgODRMMjggMTAwTDU2IDg0TDU2IDUwTDI4IDM0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiI+PC9wYXRoPgo8L3N2Zz4=") !important;
+        }
+
+        .card {
+            margin-bottom: 30px;
+        }
+
+        a.breadcrumb, .breadcrumb:before, .breadcrumb:last-child {
+            color: #757575;
+        }
+
+        .card-content {
+            border-left: 8px solid #18ffff;
+            background-color: #f5f5f5;
+        }
+
+        .card-action {
+            background-color: #ffffff !important;
+        }
+    </style>
+{% endblock %}
+{% block nav_banner %}
+    <h1>Articles</h1>
+    <div><img src="{{ static('images/svg/material_logo.svg') }}" alt=""></div>
+
+{% endblock %}
+{% block main %}
+    <main>
+        <div style="padding: 20px;width: 100%;
+                {#background: #cfd8dc;#}
+                margin: 0 auto;"></div>
+        <section class="section ">
+            <div class="container ">
+                <div class="row">
+                    <div class="col m9 s12" style="padding: 0 25px">
+                        <div class="row" style="margin-bottom: 25px">
+                            <nav>
+                                <div class="nav-wrapper blue-grey lighten-5 ">
+                                    <div class="col s12 ">
+                                        <a href="/index/" class="breadcrumb">首页</a>
+                                        <a href="#" disabled class="breadcrumb">{{ type_name }}</a>
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+                        <div id="list" class="row"></div>
+                        <div class="row center">
+                            <div id="paginator">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col m3 s12" style="padding: 0 25px">
+                        <div class="row card-panel ">
+                            <div style="border-left: 4px #18ffff">
+                                <h5>文章标签云</h5>
+                            </div>
+                            <hr>
+                            <div id="chips" style="min-height: 300px" class="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+    {% if request.user.is_admin %}
+        <div class="fixed-action-btn tooltipped"  data-position="left" data-tooltip="新增博客">
+            <a class="btn-floating btn-large red">
+                <i class="large material-icons">mode_edit</i>
+            </a>
+            <ul>
+
+                <li><a href="/app/blog/new_article/0" class="tooltipped btn-floating yellow darken-1" data-position="left" data-tooltip="新增富文本博文"><i class="material-icons">description</i></a></li>
+                <li><a href="/app/blog/new_article/1" class="tooltipped btn-floating blue" data-position="left" data-tooltip="新增markdown博文"><i class="material-icons">description</i></a></li>
+
+            </ul>
+        </div>
+        <script>
+            $(function () {
+                $(document).ready(function () {
+                    $('.fixed-action-btn').floatingActionButton();
+                        $('.tooltipped').tooltip();
+
+                });
+            })
+        </script>
+    {% endif %}
+
+
+
+{% endblock %}
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}
+{% block endbody %}
+    <script>
+
+        $(function () {
+            $.ajaxSetup({
+                headers: {"X-CSRFToken": getCookie("csrftoken")}
+            });
+            let list_section = $('#list');
+            var pageSize = 10;
+            var totalCount;
+            var totalPage;
+            var currentPage = 1;
+
+            function init_paginator() {
+                if (totalCount) {
+                    if (totalCount > pageSize) {
+
+                        let paginationElement = '<ul class="pagination">' +
+                            '<li class="disabled previous-page"><a href="javascript:void(0);"><i class="material-icons">chevron_left</i></a></li>';
+                        for (let i = 1; i <= totalPage; i++) {
+                            if (i === currentPage) {
+                                paginationElement = paginationElement + '<li class="active waves-effect page-index" data-page-index="' + i + '" >';
+                            } else {
+                                paginationElement = paginationElement + '<li class="waves-effect page-index" data-page-index="' + i + '" >';
+                            }
+                            paginationElement = paginationElement + '<a href="javascript:void(0);">' + i + '</a></li>';
+                        }
+                        paginationElement = paginationElement +
+                            '<li class="waves-effect next-page"><a href="javascript:void(0);">' +
+                            '<i class="material-icons">chevron_right</i></a>' +
+                            '</li>' +
+                            '</ul>';
+
+                        $('#paginator').html(paginationElement);
+                    }
+                }
+            }
+
+            function changePage() {
+                if (currentPage === 1) {
+                    $('.previous-page').addClass('disabled');
+                } else {
+                    $('.previous-page').removeClass('disabled');
+                }
+                if (currentPage === totalPage) {
+                    $('.next-page').addClass('disabled');
+                } else {
+                    $('.next-page').removeClass('disabled');
+                }
+            }
+
+            $(document).on('click', '.previous-page', function () {
+                if (currentPage > 1) {
+                    currentPage = currentPage - 1;
+                    load_list(pageSize, currentPage);
+                    changePage();
+                    $(document).find('.page-index.active').removeClass('active');
+                    $(document).find('.page-index[data-page-index="' + currentPage + '"]').addClass('active');
+                }
+            });
+            $(document).on('click', '.next-page', function () {
+                if (currentPage < totalPage) {
+                    currentPage = currentPage + 1;
+                    load_list(pageSize, currentPage);
+                    changePage();
+                    $(document).find('.page-index.active').removeClass('active');
+                    $(document).find('.page-index[data-page-index="' + currentPage + '"]').addClass('active');
+                }
+            });
+            $(document).on('click', 'li.page-index', function () {
+                currentPage = $(this).data('page-index');
+                load_list(pageSize, currentPage);
+                $('li.page-index.active').removeClass('active');
+                $(this).addClass('active');
+                changePage();
+            });
+
+
+            function load_list(page_size, page_num) {
+                if (!page_num) {
+                    page_num = 1
+                }
+                if (!page_size) {
+                    page_size = 10
+                }
+                let list_url = '/app/blog/blog_list/';
+
+                let type = '{{ type }}';
+                if (type === 'all') {
+                    list_url = '/app/blog/blog_list/';
+                } else if (type === 'tag') {
+                    list_url = '/app/blog/tag/' + '{{ param }}' + '/';
+                } else if (type === 'category') {
+                    list_url = '/app/blog/category/' + '{{ param }}' + '/';
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: list_url,
+                    async: false,
+                    data: {
+                        "page_size": page_size,
+                        "page_num": page_num
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        let data = result['data'];
+                        totalCount = parseInt(result['count']);
+                        if (totalCount % pageSize !== 0) {
+                            totalPage = ~~(totalCount / pageSize) + 1;
+                        } else {
+                            totalPage = totalCount / pageSize
+                        }
+                        list_section.html('');
+                        for (let i = 0; i < data.length; i++) {
+                            let pk = data[i]['pk'];
+                            let current = data[i];
+                            let title = current['title'],
+                                summary = current['summary'],
+                                cover = current['cover'],
+                                author_name = current['author_name'],
+                                author_avatar = current['author_avatar'],
+                                release_date = current['release_date'];
+                            if (!author_avatar) {
+                                author_avatar = '/static/images/default/avatar.jpg'
+                            }
+                            if (cover) {
+                                cover = '/' + cover;
+                            } else {
+                                {#cover = '/static/images/default/blog.jpg'#}
+                                cover = '/static/images/seamless/pure_color.png'
+                            }
+
+
+                            let element = '<div class="card small grey lighten-4 ">' +
+                                '<div class="card-image">' +
+                                '<img src="' + cover + '" onerror="this.onerror=null;this.src=\'/static/images/seamless/pure_color.png\'" >' +
+                                '<span class="card-title"><h3>' + title + '</h3></span>' +
+                                '</div>' +
+                                '<div class="card-content">' +
+                                '<p>' + summary + '</p>' +
+                                '</div>' +
+                                '<div class="card-action">' +
+                                '<a target="_blank" href="/app/blog/detail/' + pk + '">浏览内容</a>' +
+                                '</div>' +
+                                '</div>';
+                            list_section.append(element);
+                        }
+
+                    }
+                });
+            }
+
+            $(document).on('click', '.card', function () {
+                var href = $(this).find('a').attr('href');
+                window.open(
+                    href,
+                    '_blank' // <- This is what makes it open in a new window.
+                );
+            });
+
+            function load_tags() {
+                $.ajax({
+                    url: '/app/blog/display_tags',
+                    method: 'POST',
+                    dataType: 'json',
+                    success: function (result) {
+                        for (var i = 0; i < result.length; i++) {
+                            $('#chips').append('  <div class="chip">' +
+                                '<a target="_blank" href="/app/blog/tag/' + result[i]['pk'] + '">' + result[i]['name'] + '</a>' +
+                                '  </div>'
+                            );
+                        }
+                    }
+                });
+            }
+
+            load_list(pageSize, currentPage);
+            init_paginator();
+            load_tags()
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends '__base__.html' %}
+
+{% block title %}Edit/编辑{% endblock %}
+{% block head %}
+    <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{{ static('mdeditor/mdeditor.css') }}">
+{% endblock %}
+{% block maincontent %}
+    <div class="section container">
+        <div class="row">
+            <div class="col s12 ">
+                <div class="mdeditor-css">
+                    <form id="editorForm" method="post" action="http://127.0.0.1:8000/app/blog/md/">
+                        <div class="form-group">
+                            <label>Mon contenu</label>
+                            <textarea name="content" id="mdeditor" cols="30" rows="10" class="form-control">
+## An h2 header
+
+Paragraphs are separated by a blank line.
+
+2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists
+look like:
+
+* this one
+* that one
+* the other one
+
+> Block quotes are
+> written like so.
+>
+> They can span multiple paragraphs,
+> if you like.
+
+Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all
+in chapters 12--14"). Three dots ... will be converted to an ellipsis.
+Unicode is supported. ☺
+
+And here is a bit of code
+
+```php
+                                <?php
+$myvar = 'Here is my code';
+echo $myvar;
+?>
+                                ```
+
+### An h3 header
+
+Paragraphs are separated by a blank line.
+
+2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists
+look like:
+
+* this one
+* that one
+* the other one
+
+> Block quotes are
+> written like so.
+>
+> They can span multiple paragraphs,
+> if you like.
+
+Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all
+in chapters 12--14"). Three dots ... will be converted to an ellipsis.
+Unicode is supported. ☺
+        </textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block endscript %}
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.js"></script>
+    <script src="{{ static('mdeditor/a.js') }}"></script>
+    <script>
+        var md = new MdEditor('#mdeditor', {
+            uploader: false,
+            preview: true
+        });
+
+        $(function () {
+            $('#saveContent').on('click', function () {
+                document.getElementById('editorForm').submit();
+            })
+        })
+    </script>
+{% endblock %}

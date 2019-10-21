@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ static('mdl/favicon.png') }}"/>
+    <title>文章内容/detail</title>
+
+
+    <link href='//fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en'
+          rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css"/>
+    <script src="{{ static('js/jquery-3.4.1.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ static('mdl/styles.css') }}">
+    {% if article.is_markdown %}
+        <link rel="stylesheet" href="{{ static('editormd/css/editormd.preview.css') }}"/>
+    {% endif %}
+    <style>
+        body.scrolling #navbar {
+        {#background: #1b39a8;#}{#box-shadow: 0 1px 4px #333;#} background: #C2185B;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+        }
+
+        blockquote:before {
+            position: unset;
+        !important;
+            left: unset;
+        !important;
+            content: unset;
+        !important;
+        }
+
+        blockquote:after {
+            content: unset;
+        !important;
+            margin-left: unset;
+        !important;
+        }
+    </style>
+</head>
+<body>
+<div class="detail-blog detail-blog--blogpost mdl-layout mdl-js-layout has-drawer is-upgraded ">
+    <header id="navbar" class="mdl-layout__header mdl-layout__header--transparent ">
+        <div class="mdl-layout__header-row">
+            <span class="mdl-layout-title"><a class="mdl-navigation__link" href="/index/">首页</a></span>
+            <div class="mdl-layout-spacer"></div>
+            <nav class="mdl-navigation">
+                {% for item in categories %}
+                    <a class="mdl-navigation__link" href="/app/blog/category/{{ item.pk }}/">{{ item.name }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title"><a class="mdl-navigation__link" href="/index/">首页</a></span>
+        <nav class="mdl-navigation">
+            {% for item in categories %}
+                <a class="mdl-navigation__link" href="/app/blog/category/{{ item.pk }}/">{{ item.name }}</a>
+            {% endfor %}
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+        <div class="detail-blog__posts mdl-grid">
+            <div class="mdl-card mdl-shadow--4dp mdl-cell mdl-cell--12-col">
+                <div class="mdl-card__media mdl-color-text--grey-50"
+                     style="background-image: url({% if article.cover %}
+                         {{ '/' + article.cover.url }}
+                     {% else %}
+                         {{ static('images/backgrounds/sunset.jpg') }}
+                     {% endif %}) !important;height: 280px;">
+                    <h3>{{ article.title }}</h3>
+                </div>
+                <div class="mdl-color-text--grey-700 mdl-card__supporting-text meta">
+                    <div class="minilogo"></div>
+                    <div style="align-items: flex-start">
+                        <strong>{{ article.author.nickname }}</strong>
+                        <span>{{ article.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    <div class="section-spacer"></div>
+                    <div class="meta__favorites">
+                        {{ article.views }}次浏览
+                    </div>
+                </div>
+                <div id="content" class="mdl-color-text--grey-700 mdl-card__supporting-text">
+                    {% if not article.is_markdown %}
+                        {{ article.content  |safe }}
+                    {% else %}
+                        <textarea style="display: none">
+                        {{ article.content  |safe }}
+                        </textarea>
+                        {#                        {{ marked |safe}}#}
+                    {% endif %}
+                </div>
+                {% if article.tags is defined %}
+                    <div class="mdl-color-text--grey-700 mdl-card__supporting-text">
+                        {% for item in article.tags.all() %}
+                            <span class="mdl-chip" style="margin: 0 10px">
+                                <span class="mdl-chip__text">{{ item.name }}</span>
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="mdl-color-text--primary-contrast mdl-card__supporting-text comments">
+                    <span style="color: #616161 !important"><h5>{{ comment_count }}条留言</h5></span>
+                    <br>
+                    <form id="leave_comment">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        <input type="hidden" name="article_id" value="{{ article.pk }}">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <textarea name="content" rows=1 class="mdl-textfield__input" id="comment"></textarea>
+                            <label for="comment" class="mdl-textfield__label">留下你的评论</label>
+                        </div>
+                        <button type="button" id="send_comment"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                            <i class="material-icons" role="presentation">check</i><span class="visuallyhidden">add comment</span>
+                        </button>
+                    </form>
+
+                    <div id="comment_display">
+                        <!-- 留言部分 -->
+                        {% for comment in comment_data %}
+                            <div class="comment mdl-color-text--grey-700 comment-section">
+
+                                {% set topic = comment.get('topic') %}
+                                {% set reply_list = comment.get('reply_list') %}
+                                <header class="comment__header">
+                                    <img src="{{ static('images/default/avatar.jpg') }}" class="comment__avatar">
+                                    <div class="comment__author">
+                                        <strong>{{ topic.user.nickname }}</strong>
+                                        <span>{{ topic.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                                    </div>
+                                </header>
+                                <div class="comment__text">
+                                    {{ topic.content }}
+                                </div>
+                                <nav class="comment__actions ">
+                                    <div class="section-spacer"></div>
+                                    <a href="javascript:void(0);"
+                                       data-reply-target="{{ topic.pk }}"
+                                       class="mdl-button mdl-js-button mdl-button--raised
+                                   mdl-js-ripple-effect mdl-color--accent
+                                   mdl-color-text--white reply_trigger">
+                                        回复</a>
+                                </nav>
+                                <form data-reply-target="{{ topic.pk }}" class="reply" style="display: none">
+                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                    <div style="width: 80% !important;"
+                                         class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">
+                                        <textarea name="content" rows=1 class="mdl-textfield__input"></textarea>
+                                        <label class="mdl-textfield__label" for="sample5">留下回复</label>
+                                    </div>
+                                    <a href="javascript:void(0);" class="reply_cancel comment_btn">取消</a>
+                                    <a href="javascript:void(0);" class="comment_reply comment_btn">提交</a>
+                                </form>
+                                <div class="comment__answers">
+
+                                    {% for reply in reply_list %}
+                                        <div class="comment reply-section">
+                                            <header class="comment__header">
+                                                <img src="{{ static('images/default/avatar.jpg') }}"
+                                                     class="comment__avatar">
+                                                <div class="comment__author">
+                                                    <strong>{{ reply.user.nickname }}</strong>
+                                                    <span>{{ reply.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                                                </div>
+                                            </header>
+                                            <div class="comment__text">
+                                                {{ '@ ' + reply.reply_to_user.nickname + ' ' }}{{ reply.content }}
+                                            </div>
+                                            <nav class="comment__actions">
+                                                <div class="section-spacer"></div>
+                                                <a data-reply-target="{{ reply.pk }}" href="javascript:void(0);"
+                                                   class="mdl-button mdl-js-button mdl-button--raised
+                                               mdl-js-ripple-effect mdl-color--accent
+                                               mdl-color-text--white reply_trigger">
+                                                    回复</a>
+                                            </nav>
+                                            <form class="reply" data-reply-target="{{ reply.pk }}"
+                                                  style="display: none">
+                                                <input type="hidden" name="csrfmiddlewaretoken"
+                                                       value="{{ csrf_token }}">
+                                                <div style="width: 80% !important;"
+                                                     class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">
+                                                    <textarea name="content" rows=1
+                                                              class="mdl-textfield__input"></textarea>
+                                                    <label class="mdl-textfield__label" for="sample5">回复评论</label>
+                                                </div>
+                                                <a href="javascript:void(0);" class="comment_btn reply_cancel">取消</a>
+                                                <a href="javascript:void(0);" class="comment_reply comment_btn">提交</a>
+                                            </form>
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="mdl-mini-footer">
+            <div class="mdl-mini-footer__left-section">
+
+                <ul class="mdl-mini-footer__link-list">
+                    <li><a href="https://github.com/Noob-I-Am">github</a></li>
+                    <li>感谢来访</li>
+                    <li>SQ D © 2019</li>
+                </ul>
+            </div>
+        </footer>
+    </main>
+    <div class="mdl-layout__obfuscator"></div>
+</div>
+<style>
+    #back-to-top {
+        position: fixed;
+        display: block;
+        right: 0;
+        bottom: 0;
+        margin-right: 40px;
+        margin-bottom: 40px;
+        z-index: 900;
+    }
+</style>
+{% if (request.user.is_authenticated) and (request.user.is_admin) %}
+    <button onclick="window.open('../../editor/'+{{ article.pk }})"
+            class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored mdl-button--raised"
+            style="position:fixed;display:block;left:0;bottom:0;margin-left:40px;margin-bottom:40px;z-index:900;">
+        <i class="material-icons">mode_edit</i>
+    </button>
+{% endif %}
+<button id="back-to-top" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored mdl-button--raised">
+    <i class="material-icons">publish</i>
+</button>
+<div id="toast" class="mdl-js-snackbar mdl-snackbar">
+    <div class="mdl-snackbar__text"></div>
+    <button class="mdl-snackbar__action" type="button"></button>
+</div>
+<script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<script src="{{ static('js/utils.js') }}"></script>
+{% if article.is_markdown %}
+    <script src="{{ static('editormd/editormd.min.js') }}"></script>
+    <script src="{{ static('editormd/lib/marked.min.js') }}"></script>
+    <script src="{{ static('editormd/lib/prettify.min.js') }}"></script>
+    <script>
+        $(function () {
+            editormd.markdownToHTML("content")
+        })
+    </script>
+{% endif %}
+<script>
+    $(function () {
+        let avatar_img_url = '/static/images/default/avatar.jpg';
+        let token = '{{ csrf_token }}';
+        let is_authenticated = '{{ request.user.is_authenticated }}';
+
+        var toast_options = {
+            defaultText: 'this is a toast',
+            displayTime: 3000,
+            target: 'body'
+        };
+        let showtoast = new ToastBuilder(toast_options);
+
+        $('.mdl-layout__content').scroll(function () {
+            if ($(this).scrollTop() > 100) {
+                $('#back-to-top').fadeIn();
+                $('body').addClass('scrolling');
+            } else {
+                $('#back-to-top').fadeOut();
+                $('body').removeClass('scrolling');
+            }
+        });
+
+
+        $('#back-to-top').click(function () {
+            $('.mdl-layout__content').animate({scrollTop: 0}, 'swing');
+            return false;
+        });
+
+
+        function toast(msg) {
+            'use strict';
+            var snackbarContainer = document.querySelector('#toast');
+            snackbarContainer.MaterialSnackbar.showSnackbar({'message': msg});
+        }
+
+        $(document).on('click', '.reply_cancel', function () {
+            $(this).closest('form').find('textarea').val('');
+            $(this).first().parent().hide();
+        });
+        $(document).on('click', '.reply_trigger', function () {
+            var target = $(this).data('reply-target');
+            $('#comment_display').find('form[data-reply-target]').hide();
+            $('#comment_display').find('form[data-reply-target=' + target + ']').show();
+        });
+        $(document).on('click', '.comment_reply', function () {
+            if (is_authenticated !== 'True') {
+                toast('你还未登录,无法回复');
+            }
+
+            let myself = this;
+            let reply_form = $(this).closest('form');
+            let data = reply_form.serialize();
+            var closet_reply_section = $(this).closest('.comment__answers').find('.reply-section:first');
+            var target = reply_form.data('reply-target');
+            $.ajax({
+                url: '/app/blog/reply/' + target,
+                method: 'POST',
+                data: data,
+                success: function (result) {
+                    toast('发送成功');
+                    var reply_content = result['reply_content'];
+                    var reply_created_at = result['reply_created_at'];
+                    var reply_pk = result['reply_pk'];
+                    var reply_to_user_nickname = result['reply_to_user_nickname'];
+                    var reply_user_nickname = result['reply_user_nickname'];
+                    var elemet_html =
+                        '<div class="comment reply-section">' +
+                        '<header class="comment__header">' +
+                        '<img src="' + avatar_img_url + '" class="comment__avatar">' +
+                        '<div class="comment__author">' +
+                        '<strong>' + reply_user_nickname + '</strong>' +
+                        '<span>' + reply_created_at + '</span>' +
+                        '</div>' +
+                        '</header>' +
+                        '<div class="comment__text">' +
+                        '@ ' + reply_to_user_nickname + ' ' + reply_content +
+                        '</div>' +
+                        '<nav class="comment__actions">' +
+                        '<div class="section-spacer"></div>' +
+                        '<a data-reply-target="' + reply_pk + '" href="javascript:void(0);"' +
+                        'class="mdl-button mdl-js-button mdl-button--raised ' +
+                        'mdl-js-ripple-effect mdl-color--accent ' +
+                        'mdl-color-text--white reply_trigger">' +
+                        '回复</a>' +
+                        '</nav>' +
+                        '<form class="reply" data-reply-target="' + reply_pk + '"' +
+                        'style="display: none">' +
+                        '<input type="hidden" name="csrfmiddlewaretoken"' +
+                        'value="' + token + '">' +
+                        '<div style="width: 80% !important;"' +
+                        'class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">' +
+                        '<textarea name="content" rows=1 ' +
+                        'class="mdl-textfield__input"></textarea>' +
+                        '<label class="mdl-textfield__label" for="sample5">回复评论</label>' +
+                        '</div>' +
+                        '<a href="javascript:void(0);" class="comment_btn reply_cancel">取消</a>' +
+                        '<a href="javascript:void(0);" class="comment_reply comment_btn">提交</a>' +
+                        '</form>' +
+                        '</div>';
+                    {#$(elemet_html).insertBefore($(myself).closest('.comment-section').first().find('.comment__answers').first());#}
+                    let container = $(myself).closest('.comment-section').first().find('.comment__answers');
+                    container.prepend(elemet_html);
+                    componentHandler.upgradeDom(document.getElementById('comment_display'));
+                    $(myself).closest('form').find('textarea').val('');
+                    $(myself).first().parent().hide();
+
+                },
+                error: function (e) {
+                    toast('发送失败，出现错误');
+                    console.log(e.responseText);
+                }
+            });
+        });
+
+
+        $('#send_comment').click(function () {
+            if (is_authenticated !== 'True') {
+                toast('你还未登录，无法评论');
+            }
+
+            if ($('#comment').val().length == 0) {
+                toast('请输入内容');
+            } else {
+                {#form = $(document.getElementById('send_comment').form.id);#}
+                {#form = $('#' + document.getElementById('send_comment').form.id);#}
+                form = $('#leave_comment');
+                document.getElementById('leave_comment').reset();
+                var container = $('#comment_display');
+                data = form.serialize();
+                $.ajax({
+                    data: data,
+                    method: 'POST',
+                    url: '/app/blog/comment/{{ article.pk }}',
+                    success: function (result) {
+                        toast('发送成功');
+                        let topic_pk = result['topic_pk'];
+                        let topic_user_nickname = result['topic_user_nickname'];
+                        let topic_created_at = result['topic_created_at'];
+                        let topic_content = result['topic_content'];
+                        let element_html =
+                            '<div class="comment mdl-color-text--grey-700 comment-section">' +
+                            '<header class="comment__header">' +
+                            '<img src="' + avatar_img_url + '" class="comment__avatar">' +
+                            '<div class="comment__author">' +
+                            '<strong>' + topic_user_nickname + '</strong>' +
+                            '<span>' + topic_created_at + '</span>' +
+                            '</div>' +
+                            '</header>' +
+                            '<div class="comment__text">' +
+                            topic_content +
+                            '</div>' +
+                            '<nav class="comment__actions ">' +
+                            '<div class="section-spacer"></div>' +
+                            '<a href="javascript:void(0);"' +
+                            'data-reply-target="' + topic_pk + '"' +
+                            'class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--accent mdl-color-text--white reply_trigger">' +
+                            '回复</a>' +
+                            '</nav>' +
+                            '<form data-reply-target="' + topic_pk + '" class="reply" style="display: none">' +
+                            '<input type="hidden" name="csrfmiddlewaretoken" value="' + token + '">' +
+                            '<div style="width: 80% !important;"' +
+                            'class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">' +
+                            '<textarea name="content" rows=1 class="mdl-textfield__input"></textarea>' +
+                            '<label class="mdl-textfield__label" for="sample5">留下回复</label>' +
+                            '</div>' +
+                            '<a href="javascript:void(0);" class="reply_cancel comment_btn">取消</a>' +
+                            '<a href="javascript:void(0);" class="comment_reply comment_btn">提交</a>' +
+                            '</form>' +
+                            '<div class="comment__answers">' +
+                            '</div>' +
+                            '</div>';
+                        $('#comment_display').prepend(element_html);
+                    },
+                    error: function (e) {
+                        toast('发送失败，出现错误');
+                        console.log(e.responseText);
+                    }
+                })
+            }
+        });
+    })
+</script>
+</body>
+</html>

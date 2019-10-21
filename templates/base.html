@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="{{ static('js/jquery-3.4.1.min.js') }}"></script>
+    <link rel="icon" type="image/x-icon" href="{{ static('mdl/favicon.png') }}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link type="text/css" rel="stylesheet" href="{{ static('css/materialize.min.css') }}" media="screen,projection"/>
+{#        <script src="https://kit.fontawesome.com/ca5a7d46cc.js" crossorigin="anonymous"></script>#}
+    <script src="{{ static('js/font_awesome.js') }}"></script>
+    <script src="{{ static('js/utils.js') }}"></script>
+    <title>{% block title %}{% endblock %}</title>
+    {% block beforehead %}
+    {% endblock %}
+    <style>
+        nav {
+            position: relative;
+            top: 0;
+        {#transition: background-color .3s, opacity .2s, visibility 0s;#} box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+        {#box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);#} z-index: 10;
+        }
+
+        nav .nav-banner {
+            word-wrap: break-word;
+            clear: both;
+            padding: 40px 0;
+        }
+
+        nav.navbar-extended {
+            height: auto !important;
+        }
+
+        nav .nav-background {
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+            opacity: .1;
+        }
+
+        nav .nav-background img.active, nav .nav-background .pattern.active {
+            opacity: 1;
+        }
+
+        nav .nav-background .pattern {
+            top: 0;
+            bottom: 0;
+            -webkit-transform: none;
+            transform: none;
+            background-repeat: repeat;
+        }
+
+        nav .nav-background img, nav .nav-background .pattern {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+            right: 0;
+            left: 0;
+            margin: 0 auto;
+            max-width: 100%;
+            -webkit-filter: grayscale(100%);
+            filter: grayscale(100%);
+            transition: opacity .7s;
+        }
+
+        .navbar-extended .background-pattern {
+            top: 0;
+            background-repeat: repeat;
+            opacity: .1;
+            -webkit-filter: grayscale(100%);
+            filter: grayscale(100%);
+            transition: opacity .7s;
+        }
+
+        nav .user-account .circle {
+            margin-right: 10px;
+        }
+
+        nav .circle {
+            vertical-align: middle;
+            height: 32px;
+            width: 32px;
+        }
+
+        nav ul li .nav-emphasis-li {
+            border-bottom: 4px solid #fff;
+            display: inline-block;
+        }
+
+        .nav-background > div {
+            height: 100%;
+            background-image: url('{{ static ('images/seamless/creative.jpg') }}');
+        }
+
+        .card:hover {
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        }
+        footer .fa-4x, footer .local-svg {
+            margin: 5px 10px;
+            font-size: 4em;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar-extended teal">
+    <div class="nav-background">
+        <div>
+        </div>
+    </div>
+    <div class="nav-wrapper container">
+        <a href="#" class="brand-logo">MD blog</a>
+        <a href="#" class="sidenav-trigger" data-target="mobile-nav">
+            <i class="material-icons">menu</i>
+        </a>
+        <ul  class="right hide-on-med-and-down">
+            <li id="home_link"><a href="/index/" class="nav-emphasis-li">Home</a></li>
+            {% if request.user.is_authenticated %}
+                <li>
+                    <a href="#" class="user-account dropdown-trigger" data-target="user-account-dropdown"
+                       data-activates="user-account-dropdown">
+                        <img class="circle" src="{% if request.user.avatar %}{{ '/' + request.user.avatar.url }}{% else %}{{ static('images/default/avatar.jpg') }}{% endif %}"
+                            onerror="this.onerror=null;this.src='{{ static('images/default/avatar.jpg') }}';">
+                        {{ request.user.nickname }}
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                    <ul id="user-account-dropdown" class="dropdown-content">
+                        <li><a href="/user/modify_user_page/">修改资料</a></li>
+                        <li><a href="/user/logout/">登出</a></li>
+                    </ul>
+                </li>
+            {% else %}
+                <li><a href="/user/login_page/">登入</a></li>
+                <li><a href="/user/signup_page/">注册</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="nav-banner center">
+        {% block nav_banner %}
+
+        {% endblock %}
+    </div>
+</nav>
+<ul class="sidenav side-bar" id="mobile-nav">
+    {% if request.user.is_authenticated %}
+        <li>
+            <ul class="collapsible user-account-collapsible" data-collapsible="accordion">
+                <li class="active">
+                    <div class="collapsible-header active" style="padding: 0px 0px 0px 0px;">
+                        <div class="user-view" style="margin: 0px;width: 100%;">
+                            <div class="background">
+                                <img src="{{ static('images/office.jpg') }}">
+                            </div>
+                            <img class="circle" src="https://www.gravatar.com/avatar/03dc01e8215c6369e0234367f5c737ff">
+                            <span class="white-text name">{{ request.user.nickname }}</span>
+                            <span class="white-text email">{{ request.user.email }}
+                                    <i class="material-icons right">arrow_drop_down</i>
+                                </span>
+                        </div>
+                    </div>
+                    <div class="collapsible-body no-padding"
+                         style="display: block; padding-top: 0px; margin-top: 0px; padding-bottom: 0px; margin-bottom: 0px;">
+                        <ul>
+                            <li><a href="/user/modify_user_page/">修改资料</a></li>
+                            <li><a href="/user/logout/">Log Out</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    {% else %}
+        <li><a href="/user/login_page/">登入</a></li>
+        <li><a href="/user/signup_page/">注册</a></li>
+        <li>
+            <div class="divider"></div>
+        </li>
+    {% endif %}
+
+</ul>
+{% block main %}
+{% endblock %}
+{% block footer %}
+{% endblock %}
+<script src="{{ static('js/materialize.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({
+                headers: {"X-CSRFToken": getCookie("csrftoken")}
+            });
+        $.ajax({
+            type: 'get',
+            url: '/app/blog/get_categories/',
+            dataType: 'json',
+            success:function (data) {
+                var ele='';
+                for(let i=0;i<data.length;i++){
+                    ele=ele+'<li><a href="/app/blog/category/'+data[i]['pk']+'/">'+data[i]['name']+'</a></li>';
+                }
+                $(ele).insertAfter('#home_link');
+                $('#mobile-nav').append(ele);
+            }
+        });
+        $('.sidenav').sidenav();
+        $('.dropdown-trigger').dropdown({
+            coverTrigger: false,
+            constrainWidth: true,
+            hover: true
+        });
+        $('.collapsible').collapsible();
+    });
+
+</script>
+{% block endbody %}
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,80 @@
+{% extends '__base__.html' %}
+
+{% block title %}SignUp/登录{% endblock %}
+
+{% block head %}
+    <style type="text/css">
+        .card-content form div {
+            margin-top: 35px;
+            margin-bottom: 35px;
+        }
+
+    </style>
+{% endblock %}
+{% block maincontent %}
+    <div class="repeating-background">
+        <div class="pattern" style="background-image: url('{{ static ('images/3.png') }}')"></div>
+    </div>
+    <div class="section container">
+        <div class="row">
+            <div class="col s12 m6 offset-m3">
+                <div class="card ">
+                    <div class="card-content">
+                        <form method="post" action="/user/login/" id="login" accept-charset="UTF-8">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            <h4 class="center" style="margin: 0 0 20px 0;">登录</h4>
+                            <div class="input-field">
+                                <label for="email" class="active">
+                                    邮箱
+                                </label>
+                                <input type="email" name="email" id="email" maxlength="50" length="50"
+                                       spellcheck="false" autocomplete="off" autocapitalize="off">
+                            </div>
+
+                            <div class="input-field">
+                                <label for="password" class="active">
+                                    密码
+                                </label>
+                                <input type="password" name="password" id="password" class="">
+                            </div>
+
+                            <p>
+                                <input type="submit" value="Log in" class="btn-large z-depth-0" style="width: 100%;">
+                            </p>
+                            <a style="color:#7db557;display: inline-block;font-size: 14px;margin-top: 15px;"
+                               href="/user/reset_passwd_page/">忘记密码?</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block endscript %}
+    <script>
+        $(function () {
+            $.ajaxSetup({
+                headers: {"X-CSRFToken": getCookie("csrftoken")}
+            });
+            $('#login').submit(function (ev) {
+                ev.preventDefault();
+                {#let formdata = new FormData();#}
+                {#let inputs = $('#login input[name], textarea[name]').not(':empty');#}
+                {#$.each(inputs.prevObject, function (index, item) {formdata.append(item['name'], item['value'])});#}
+                $.ajax({
+                    url: $('#login').attr('action'),
+                    type: 'POST',
+                    data: $('#login').serialize(),
+                    success: function (data) {
+                         M.toast({html:'登录成功'});
+                        setTimeout(function(){ window.location = data; },3000);
+                    },
+                    error:function () {
+                        M.toast({html:'登录失败'});
+                        {#window.location.replace('/index/')#}
+                    }
+                });
+            });
+        })
+    </script>
+{% endblock %}

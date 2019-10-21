@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Article/博客
+{% endblock %}
+
+{% block maincontent %}
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m8 offset-m1">
+                <div class="section">
+                     <div class="card">
+                         <div class="card-title">
+                             {{ article.title }}
+                         </div>
+                         <div class="card-content">
+                            {{ article.content }}
+                         </div>
+                     </div>
+                </div>
+                <div class="section">
+                    <div>
+                        <form action="/app/blog/comment/" method="post">
+                            <input name="article_id" type="hidden" value="{{ article.pk }}">
+                            <input id="comment" name="content" type="text" data-length="10">
+                            <button class="btn waves-effect waves-light">发送</button>
+                        </form>
+                    </div>
+                        <ul>
+                            {% for item in comments %}
+                                <li>
+                                    <div>
+                                        <span>{{ item['nickname'] }}</span>
+                                        <br>
+                                        <span>{{ item['comment'].content }}</span>
+                                        <div style="margin-left: 30px">
+                                            reply
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                     <hr>
+                </div>
+            </div>
+            <div class="col m3 x13 offset-xl1">
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

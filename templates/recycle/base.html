@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{{ static('css/materialize.min.css') }}" media="screen,projection"/>
+    <link rel="stylesheet" href="{{ static('css/base.css') }}">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>base</title>
+</head>
+
+<body>
+<div>
+    <nav class="nav-extend light-blue lighten-1">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">Mx's Blog</a>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#" class="nav-emphasis-li">Home</a></li>
+                <li><a href="#">
+                    <i class="material-icons">search</i></a>
+                </li>
+                {% if login %}
+                <li><a href="#">Log in</a></li>
+                <li><a href="#">Create account</a></li>
+                {% else %}
+                <li>
+                    <a href="#" class="user-account dropdown-trigger" data-target="user-account-dropdown"
+                       data-activates="user-account-dropdown">
+                        <img class="circle" src="https://www.gravatar.com/avatar/03dc01e8215c6369e0234367f5c737ff">
+                        max
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                    <ul id="user-account-dropdown" class="dropdown-content">
+                        <li><a href="#">Addresses</a></li>
+                        <li><a href="#">Log Out</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+
+
+        </div>
+    </nav>
+    <ul id="mobile-nav" class=" sidenav side-bar">
+        <li>
+            <ul class="collapsible user-account-collapsible" data-collapsible="accordion">
+                <li class="active">
+                    <div class="collapsible-header active" style="padding: 0px 0px 0px 0px;">
+                        <div class="user-view" style="margin: 0px;width: 100%;">
+                            <div class="background">
+                                <img src="{{ static('images/office.jpg') }}">
+                            </div>
+
+                            <img class="circle" src="https://www.gravatar.com/avatar/03dc01e8215c6369e0234367f5c737ff">
+
+
+                            <span class="white-text name">max diro</span>
+
+
+                            <span class="white-text email">565223635@163.com<i class="material-icons right">arrow_drop_down</i></span>
+
+                        </div>
+                    </div>
+                    <div class="collapsible-body no-padding"
+                         style="display: block; padding-top: 0px; margin-top: 0px; padding-bottom: 0px; margin-bottom: 0px;">
+                        <ul>
+                            <li><a href="#">My Account</a></li>
+                            <li><a href="#">Addresses</a></li>
+                            <li><a href="#">Log Out</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </li>
+        <li><a href="#!">First Link With Icon</a></li>
+        <li><a href="#!">Second Link</a></li>
+        <li>
+            <div class="divider"></div>
+        </li>
+        <li><a class="subheader">Subheader</a></li>
+        <li><a class="waves-effect" href="#!">Third Link With Waves</a></li>
+    </ul>
+</div>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.js"></script>
+<script src="{{ static('js/materialize.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('.sidenav').sidenav();
+        $('.dropdown-trigger').dropdown({
+            coverTrigger: false,
+            constrainWidth: true,
+            hover: true
+        });
+        $('.collapsible').collapsible();
+    });
+</script>
+</body>
+
+</html>

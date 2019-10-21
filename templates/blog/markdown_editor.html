@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="{{ static('editormd/css/editormd.css') }}"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ static('mdl/favicon.png') }}"/>
+    <script src="{{ static('js/jquery-3.4.1.min.js') }}"></script>
+    <link rel="stylesheet/less" type="text/css" href="{{ static('css/PartialMD.less') }}"/>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/3.9.0/less.min.js"></script>
+    <title>Edit/编辑</title>
+</head>
+<body>
+<div class="section">
+    <div id="layout">
+        <form id="form" action="/app/blog/save/" method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input id="article_id" type="hidden" name="article_id" value="{% if article is defined %}{{ article.pk }}{% endif %}">
+            <div class="material-part" style="width: 100%; padding: 0 20px">
+                <div class="row">
+                    <div class="col m6">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">mode_edit</i>
+                                <textarea id="title" name="title" maxlength="50"
+                                          class="materialize-textarea">{% if article is defined %}{{ article.title }}{% endif %}</textarea>
+                                <label for="title">标题</label>
+                            </div>
+                            {#                        </div>#}
+                            {#                        <div class="row">#}
+                            <div class="input-field col s12">
+                                <textarea id="summary" name="summary" maxlength="200"
+                                          class="materialize-textarea">{% if article is defined %}{{ article.summary }}{% endif %}</textarea>
+                                <label for="summary">简介</label>
+                            </div>
+                            {#                        </div>#}
+                            {#                        <div class="row">#}
+                            <div class="input-field col s12">
+                                <div id="tag_chips" class="chips"></div>
+                            </div>
+                            {#                        </div>#}
+                            {#                        <div class="row ">#}
+                            <div class="input-field white-text col s6">
+                                <select name="category" id="category">
+                                    <option value="" disabled selected>选择文章分类</option>
+                                    {% for item in categories %}
+                                        <option value="{{ item.pk }}"
+                                                {% if( (article is  defined) and (article.category == item) ) %}selected{% endif %}
+                                        >{{ item.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class=" input-field col s6">
+                                <div>
+                                    <button id="upload_button" class="btn waves-effect waves-light" type="button">上传封面
+                                        <i class="material-icons right">file_upload</i>
+                                    </button>
+                                    <input name="cover" id="cover" type="file" style="display: none">
+                                    <a id="cancel_edit" href="/index/" class="btn waves-effect waves-light red darken-1"
+                                       type="button">放弃
+                                        <i class="material-icons right">close</i>
+                                    </a>
+                                    <button id="save" class="btn waves-effect waves-light" type="submit"
+                                            style="margin-left: 10px">保存
+                                        <i class="material-icons right">send</i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col m5">
+                        <div class="row">
+                            <div class="col s12">
+                                <h4 class="teal-text">封面预览</h4>
+                            </div>
+                            <div class="col s12">
+                                <div class="card small z-depth-2 s12">
+                                    <div class="card-image">
+                                        <img id="preview_cover" class="materialboxed"
+                                             src="
+
+                                                     {% if ((article is defined) and (article.cover)) %}{{ '/' + article.cover.url }}{% endif %}"
+                                             alt="Image not found"
+                                             onerror="this.src='{{ static("images/default/blog.jpg") }}'"
+                                        >
+                                    </div>
+                                    <div class="card-content">
+                                <span id="preview_title" style=""
+                                      class="card-title blue-text text-darken-2">{% if article is defined %}
+                                    {{ article.title }}{% endif %}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div id="editor_zone" style="z-index: 999">
+                        <textarea name="content"
+                                  style="display:none;">{% if article is defined %}{{ article.content }}{% endif %}</textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script src="{{ static('editormd/editormd.min.js') }}"></script>
+<script src="{{ static('js/materialize.js') }}"></script>
+<script src="{{ static('js/utils.js') }}"></script>
+<script type="text/javascript">
+
+    var toast_options = {
+        defaultText: 'this is a toast',
+        displayTime: 3000,
+        target: 'body'
+    };
+    var showtoast = new ToastBuilder(toast_options);
+
+
+    var mdEditor;
+
+    $(function () {
+        mdEditor = editormd("editor_zone", {
+            width: "95%",
+            height: 550,
+            {#syncScrolling: "single",#}
+            path: "{{ static('editormd/lib/') }}"
+        });
+        M.AutoInit();
+        $('#tag_chips').chips({
+            data: {{ tags|safe }},
+            placeholder: '添加标签',
+        });
+        $('#category').formSelect();
+        $('#form').submit(function (ev) {
+            ev.preventDefault();
+            data = {};
+            inputs = $('#form input[name], textarea[name], #category').not(':empty');
+            $.each(inputs.prevObject, function (index, item) {
+                data[item['name']] = item['value']
+            });
+            list = [];
+            chips_data = M.Chips.getInstance($('#tag_chips')).getData();
+            for (let m in  chips_data) {
+                list.push(chips_data[m]['tag']);
+            }
+
+
+            data['tags'] = list.toString();
+            formdata = new FormData();
+            for (var i in data) {
+                formdata.append(i, data[i]);
+            }
+            let cover_file = $('#cover')[0].files[0];
+            if (cover_file) {
+                formdata.append('cover', cover_file);
+            }
+            formdata.append('is_markdown', 'True');
+            //formdata.append('cover', $('#cover')[0].files[0]);
+            $.ajax({
+                enctype: 'multipart/form-data',
+                type: 'POST',
+                url: '../save/',
+                data: formdata,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    showtoast('保存成功');
+                    setTimeout(function(){location.replace('/app/blog/detail/'+data[0]['pk'])},3000);
+                },
+                error: function () {
+                    showtoast('保存失败');
+                }
+
+            });
+            return false
+        });
+
+        function preview_change(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#preview_cover').attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#cover").change(function () {
+            preview_change(this);
+        });
+        $('#upload_button').click(function () {
+            $('#cover').click();
+        });
+        $('#title').change(function () {
+            $('#preview_title').text($('#title').val());
+        });
+    });
+</script>
+<style>
+    .hiddendiv {
+        display: none;
+    }
+</style>
+</body>
+</html>
+
+{#                <div class="row">#}
+{#                    <div class="input-field col m4">#}
+{#                        <i class="material-icons prefix">mode_edit</i>#}
+{#                        <textarea id="title" name="title" maxlength="50"#}
+{#                                  class="materialize-textarea">{{ article.title if article != None }}</textarea>#}
+{#                        <label for="title">标题</label>#}
+{#                    </div>#}
+{#                    <div class="input-field col  m6">#}
+{#                        <textarea id="summary" name="summary" maxlength="200"#}
+{#                                  class="materialize-textarea">{{ article.summary if article != None }}</textarea>#}
+{#                        <label for="summary">简介</label>#}
+{#                    </div>#}
+{#                    <div class=" input-field col m2  ">#}
+{#                        <div>#}
+{#                            <button id="cancel_edit" class="btn waves-effect waves-light" type="button">放弃#}
+{#                                <i class="material-icons right">close</i>#}
+{#                            </button>#}
+{#                            <button id="save" class="btn waves-effect waves-light" type="submit"#}
+{#                                    style="margin-left: 10px">保存#}
+{#                                <i class="material-icons right">send</i>#}
+{#                            </button>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="row">#}
+{#                    <div class="col m6">#}
+{#                        <div class="row">#}
+{#                            <div class="col s12">#}
+{#                                <div class="input-field white-text col s5">#}
+{#                                    <select name="category" id="category">#}
+{#                                        <option value="" disabled selected>选择文章分类</option>#}
+{#                                        {% for item in categories %}#}
+{#                                            <option value="{{ item.pk }}"#}
+{#                                                    {% if( (article is  defined) and (article.category == item) ) %}selected{% endif %}#}
+{#                                            >{{ item.name }}</option>#}
+{#                                        {% endfor %}#}
+{#                                    </select>#}
+{#                                </div>#}
+{#                                <div class="input-field col s7">#}
+{#                                    <div class="file-field input-field">#}
+{#                                        <div class="btn">#}
+{#                                            <span>封面</span>#}
+{#                                            <input type="file">#}
+{#                                        </div>#}
+{#                                        <div class="file-path-wrapper">#}
+{#                                            <input class="file-path validate" type="text">#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="col s12">#}
+{#                                    <div id="tag_chips" class="chips"></div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col m5">#}
+{#                    <div class="row ">#}
+{#                        <div class="card small z-depth-2">#}
+{#                            <div class="card-image">#}
+{#                                <img id="preview_cover" class="materialboxed"#}
+{#                                     src="#}
+{#                                             {% if ((article is defined) and (article.cover)) %}{{ '/' + article.cover.url }}{% endif %}"#}
+{#                                     alt="Image not found"#}
+{#                                     onerror="this.src='{{ static("images/default/blog.jpg") }}'"#}
+{#                                >#}
+{#                            </div>#}
+{#                            <div class="card-content">#}
+{#                                <span id="preview_title" style=""#}
+{#                                      class="card-title blue-text text-darken-2">{% if article is defined %}#}
+{#                                    {{ article.title }}{% endif %}</span>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    </div>#}
+{#                </div>#}

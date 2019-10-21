@@ -1,0 +1,63 @@
+{% extends '__base__.html' %}
+
+{% block title %}SignUp/注册{% endblock %}
+
+{% block maincontent %}
+        <div class="repeating-background">
+                <div class="pattern" style="background-image: url('{{ static ('images/3.png') }}')"></div>
+        </div>
+        <div class="section container">
+            <div class="row">
+                <div class="col s12 m6 offset-m3">
+                    <div class="card ">
+                        <div class="card-content">
+
+                            <form method="post" action="/user/signup/" id="create_customer" accept-charset="UTF-8">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                <h4 class="center" style="margin: 0 0 20px 0;">新建账号</h4>
+                                <div class="input-field">
+                                    <label for="nickname" class="">
+                                        NickName
+                                    </label>
+                                    <input type="text" name="nickname" maxlength="10" length="10"  id="nickname" >
+                                </div>
+                                <div class="input-field">
+                                    <label for="email" class="active">
+                                        邮箱
+                                    </label>
+                                    <input type="email" name="email" id="email"  maxlength="50" length="50"
+                                        spellcheck="false" autocomplete="off" autocapitalize="off">
+                                </div>
+
+                                <div class="input-field">
+                                    <label for="password1" class="active">
+                                        密码
+                                    </label>
+                                    <input type="password" name="password1" id="password1" class="">
+                                </div>
+                                <div class="input-field">
+                                    <label for="password2" class="active">
+                                        重复密码
+                                    </label>
+                                    <input type="password" name="password2" id="password2" class="">
+                                </div>
+                                <div class="input-field">
+                                        <textarea id="profile" class="materialize-textarea" name="profile"  maxlength="200" length="200"></textarea>
+                                        <label for="profile">简介</label>
+                                    </div>
+
+                                <p>
+                                    <input type="submit" value="Create" class="btn-large z-depth-0">
+                                </p>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block endscript %}
+    <script src="{{ static('js/signup.js') }}"></script>
+{% endblock %}

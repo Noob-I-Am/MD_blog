@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ static('mdl/favicon.png') }}"/>
+    <script src="{{ static('js/jquery-3.4.1.min.js') }}"></script>
+    <link type="text/css" rel="stylesheet" href="{{ static('css/materialize.min.css') }}" media="screen,projection"/>
+    <style>
+        /* label color */
+        .input-field label {
+            color: #000;
+        }
+
+        /* label focus color */
+        .input-field input[type=text]:focus + label {
+            color: #000;
+        }
+
+        /* label underline focus color */
+        .input-field input[type=text]:focus {
+            border-bottom: 1px solid #000;
+            box-shadow: 0 1px 0 0 #000;
+        }
+
+        /* valid color */
+        .input-field input[type=text].valid {
+            border-bottom: 1px solid #000;
+            box-shadow: 0 1px 0 0 #000;
+        }
+
+        /* invalid color */
+        .input-field input[type=text].invalid {
+            border-bottom: 1px solid #000;
+            box-shadow: 0 1px 0 0 #000;
+        }
+
+        /* icon prefix focus color */
+        .input-field .prefix.active {
+            color: #000;
+        }
+
+        .ul .li {
+            z-index: 999;
+        }
+
+    </style>
+    <title>editor</title>
+</head>
+<body>
+<main>
+    {#    <section class="section grey lighten-4 center">#}
+    <div class="row " style="padding: 3% 3%">
+        <form id="form" class="col s10 offset-s1" enctype="multipart/form-data" action="" method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input name="article_id" type="hidden" value="{% if article is defined %}{{ article.pk }}{% endif %}">
+            <input id="content" type="text" style="display: none" name="content"
+                   value="{% if article is defined %}{{ article.content }}{% endif %}">
+            <div class="row">
+                <div class="col s8">
+                    <div class="row ">
+                        <div class="input-field col s6 ">
+                            <input id="title" name="title" type="text"
+                                   value="{% if article is defined %}{{ article.title }}{% endif %}"
+                                   placeholder="标题" class="validate">
+                        </div>
+                        <div class="input-field col s12 ">
+                            <input name="summary" value="{% if article is defined %}{{ article.summary }}{% endif %}"
+                                   placeholder="简介" type="text" class="validate">
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col s12">
+                            <div id="editor" class="col s12"></div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col s7">
+                            <div id="tag_chips" class="chips"></div>
+                        </div>
+                        <div class="col s5">
+                            <div class="row"></div>
+                            <div class="row right">
+                                <div class="col s12">
+                                    <button id="save" type="submit" style="" class="btn waves-teal center">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s4">
+                    <div class="row">
+                        <div class="card-panel  ">
+                            <div class="row ">
+                                <div class="col s12  teal-text">
+                                    <h5>Choose category</h5>
+                                </div>
+                                <div class="input-field white-text col s12">
+                                    <select name="category" id="category">
+                                        <option value="" disabled selected>选择文章分类</option>
+                                        {% for item in categories %}
+                                            <option value="{{ item.pk }}"
+                                                    {% if( (article is defined) and (article.category == item) ) %}selected{% endif %}
+                                            >{{ item.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h5 class="teal-text">封面预览</h5>
+                    <div class="row ">
+                        <div class="card small z-depth-2">
+                            <div class="card-image">
+                                <img id="preview_cover" class="materialboxed"
+                                     src="
+
+                                             {% if ((article is defined) and (article.cover)) %}{{ '/' + article.cover.url }}{% endif %}"
+                                     alt="Image not found"
+                                     onerror="this.src='{{ static("images/default/blog.jpg") }}'"
+                                >
+                            </div>
+                            <div class="card-content">
+                                <span id="preview_title" style=""
+                                      class="card-title blue-text text-darken-2">{% if article is defined %}
+                                    {{ article.title }}{% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="cover" style="display: none" name="cover" type="file">
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- floating button -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large red">
+            <i class="large material-icons">mode_edit</i>
+        </a>
+        <ul>
+            <li>
+                <a id="upload_button" class="btn-floating tooltipped red" data-position="left" data-tooltip="修改封面图片">
+                    <i class="material-icons">insert_chart</i>
+                </a>
+            </li>
+            <li>
+                <a id="refresh" class="btn-floating tooltipped yellow darken-1" data-position="left"
+                   data-tooltip="撤销修改并重新加载页面">
+                    <i class="material-icons">refresh</i>
+                </a>
+            </li>
+        </ul>
+    </div>
+    {#    </section>#}
+</main>
+<script src="{{ static('js/materialize.js') }}"></script>
+<script src="{{ static('ckeditor/ckeditor.js') }}"></script>
+<script src="{{ static('js/utils.js') }}"></script>
+<script>
+    $(function () {
+
+        var toast_options = {
+            defaultText: 'this is a toast',
+            displayTime: 3000,
+            target: 'body'
+        };
+        var showtoast = new ToastBuilder(toast_options);
+
+        M.AutoInit();
+        $('#tag_chips').chips({
+            data: {{ tags|safe }},
+        });
+        $('#category').formSelect();
+        //ckeditor编辑器
+        var editor = CKEDITOR.replace('editor');
+        CKEDITOR.instances.editor.setData($('#content').val());
+        CKEDITOR.instances.editor.on('change', function (event) {
+            content = CKEDITOR.instances.editor.getData();
+            $('#content').val(content)
+        });
+
+        function preview_change(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#preview_cover').attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $('#form').submit(function (ev) {
+            ev.preventDefault();
+            data = {};
+            inputs = $('#form input[name], textarea[name], #category').not(':empty');
+            $.each(inputs.prevObject, function (index, item) {
+                data[item['name']] = item['value']
+            });
+            list = [];
+            chips_data = M.Chips.getInstance($('#tag_chips')).getData();
+            for (let m in  chips_data) {
+                list.push(chips_data[m]['tag']);
+            }
+
+
+            data['tags'] = list.toString();
+            formdata = new FormData();
+            for (var i in data) {
+                formdata.append(i, data[i]);
+            }
+            let cover_file = $('#cover')[0].files[0];
+            if (cover_file) {
+                formdata.append('cover', cover_file);
+            }
+            formdata.append('is_markdown', 'False');
+
+
+            $.ajax({
+                enctype: 'multipart/form-data',
+                type: 'POST',
+                url: '../save/',
+                data: formdata,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    showtoast('保存成功');
+                    setTimeout(function(){location.replace('/app/blog/detail/'+data[0]['pk'])},3000);
+                },
+                error: function () {
+                    M.toast({html: '<span style="color:red">保存失败</span>'});
+                }
+
+            });
+            return false
+        });
+
+        $("#cover").change(function () {
+            preview_change(this);
+        });
+        $('#upload_button').click(function () {
+            $('#cover').click();
+        });
+        $('#title').change(function () {
+            $('#preview_title').text($('#title').val());
+        });
+        $('#refresh').click(function () {
+            location.reload();
+        });
+    })
+
+</script>
+</body>
+</html>

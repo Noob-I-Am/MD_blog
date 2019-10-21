@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/x-icon" href="{{ static('mdl/favicon.png') }}"/>
+    <script src="{{ static('js/jquery-3.4.1.min.js') }}"></script>
+    <link type="text/css" rel="stylesheet" href="{{ static('css/materialize.min.css') }}" media="screen,projection" />
+    <link rel="stylesheet" href="{{ static('css/__base__.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        main{
+            align-content: center;
+        }
+    </style>
+    <title>{% block title %} ? {% endblock %} | MD blog</title>
+    {% block head %} {% endblock %}
+</head>
+
+<body>
+    <div role="navigation">
+        <nav class="nav-extend light-blue lighten-1">
+
+            <div class="nav-wrapper container">
+                <a href="#" class="brand-logo">MD Blog</a>
+                <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="/index/" class="nav-emphasis-li">Home</a></li>
+                    {% if request.user.is_authenticated %}
+                    <li>
+                        <a href="#" class="user-account dropdown-trigger" data-target="user-account-dropdown"
+                            data-activates="user-account-dropdown">
+                            <img class="circle" src="https://www.gravatar.com/avatar/03dc01e8215c6369e0234367f5c737ff">
+                                {{ request.user.nickname }}
+                            <i class="material-icons right">arrow_drop_down</i>
+                        </a>
+                        <ul id="user-account-dropdown" class="dropdown-content">
+                            <li><a href="/user/modify_user_page/">修改资料</a></li>
+                            <li><a href="/user/logout/">登出</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li><a href="/user/login_page/">登入</a></li>
+                    <li><a href="/user/signup_page/">注册</a></li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </nav>
+{#        <div class="repeating-background">#}
+{#                <div class="pattern" style="background-image: url('{{ static ('images/3.png') }}')"></div>#}
+{#        </div>#}
+        <ul id="mobile-nav" class=" sidenav side-bar">
+            {% if request.user.is_authenticated %}
+            <li>
+                <ul class="collapsible user-account-collapsible" data-collapsible="accordion">
+                    <li class="active">
+                        <div class="collapsible-header active" style="padding: 0px 0px 0px 0px;">
+                            <div class="user-view" style="margin: 0px;width: 100%;">
+                                <div class="background">
+                                    <img src="{{ static('images/office.jpg') }}">
+                                </div>
+                                <img class="circle" src="https://www.gravatar.com/avatar/03dc01e8215c6369e0234367f5c737ff">
+                                <span class="white-text name">{{ request.user.nickname }}</span>
+                                <span class="white-text email">{{ request.user.email }}
+                                    <i class="material-icons right">arrow_drop_down</i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="collapsible-body no-padding"
+                            style="display: block; padding-top: 0px; margin-top: 0px; padding-bottom: 0px; margin-bottom: 0px;">
+                            <ul>
+                                <li><a href="/user/modify_user_page/">修改资料</a></li>
+                                <li><a href="/user/logout/">登出</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+            {% else %}
+            <li><a href="/user/login_page/">登入</a></li>
+            <li><a href="/user/signup_page/">注册</a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
+            {% endif %}
+            <li><a class="subheader">Subheader</a></li>
+            <li><a class="waves-effect" href="#!">Third Link With Waves</a></li>
+        </ul>
+    </div>
+
+    <main role="main" class="main-content">
+        {% block maincontent %}
+        {% endblock %}
+    </main>
+    <script src="{{ static('js/materialize.js') }}"></script>
+    <script src="{{ static('js/utils.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('.dropdown-trigger').dropdown({
+                coverTrigger: false,
+                constrainWidth: true,
+                hover: true
+            });
+            $('.collapsible').collapsible();
+        });
+
+    </script>
+    {% block endscript %}
+    {% endblock %}
+
+</body>
+
+</html>

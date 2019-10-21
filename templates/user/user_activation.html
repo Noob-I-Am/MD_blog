@@ -1,0 +1,39 @@
+{% extends '__base__.html' %}
+
+{% block title %}等待账户激活{% endblock %}
+
+{% block maincontent %}
+    <div class="repeating-background">
+        <div class="pattern" style="background-image: url('{{ static ('images/3.png') }}')"></div>
+    </div>
+    <div class="section container">
+        <div class="row center">
+            <div class="card-panel center">
+                <span>你的账号还未激活, 邮件已发送至你的邮箱，请点击邮件中的链接来完成账号激活</span>
+                <br>
+                <span style="color: red">
+                        <a id="send_email" href="javascript:void(0);" style="text-decoration-line: unset">未收到？点击再发一封</a>
+                    </span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block endscript %}
+    <script>
+    $(function () {
+         $.ajaxSetup({
+                headers: {"X-CSRFToken": getCookie("csrftoken")}
+            });
+         $(document).on('click', '#send_email', function () {
+           $.ajax({
+               url: '/user/activate_page/'+{{ user.pk }},
+               method: 'POST',
+               success:function () {
+                   alert('已发送')
+               }
+           })
+        })
+    })
+    </script>
+{% endblock %}

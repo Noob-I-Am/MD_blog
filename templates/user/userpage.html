@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <p>
+        {% if request.user %}
+            is authenticated? : {{ request.user.is_authenticated }}
+        {% else %}
+            not authenticated
+        {% endif %}
+    </p>
+</div>
+
+<div>
+    <p>
+    <form  action="/user/login/" method="post">
+{#        {% csrf_token %}#}
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input id="email" type="text" name="email">
+        <input type="password" name="password">
+    <button type="submit">login</button>
+    </form>
+
+    </p>
+</div>
+<div>
+    <form action="/user/logout/" method="post">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <button type="submit" >logout</button>
+    </form>
+</div>
+
+<div>
+    <form action="/user/do/" method="post">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <button type="submit" value="do">do</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+</body>
+</html>
